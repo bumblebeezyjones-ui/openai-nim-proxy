@@ -39,6 +39,15 @@ const MODEL_MAPPING = {
   'mistral-large': 'minimax/minimax-m2.5',             // New 230B model
 };
 
+// Only these models support thinking mode - others will 400 error if you send it
+const THINKING_MODELS = [
+  'qwen/qwen3-next-80b-a3b-thinking',
+  'qwen/qwen3-235b-a22b',
+  'qwen/qwen3-coder-480b-a35b-instruct',
+  'deepseek-ai/deepseek-r1',
+  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+];
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
@@ -105,7 +114,7 @@ app.post('/v1/chat/completions', async (req, res) => {
       messages: messages,
       temperature: temperature || 0.6,
       max_tokens: Math.min(max_tokens || 2048, 4096), // Limit max tokens
-      extra_body: ENABLE_THINKING_MODE ? { chat_template_kwargs: { thinking: true } } : undefined,
+      extra_body: ENABLE_THINKING_MODE && THINKING_MODELS.includes(nimModel) ? { chat_template_kwargs: { thinking: true } } : undefined,
       stream: stream || false
     };
     
